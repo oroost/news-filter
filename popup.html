@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Swapper</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <span class="logo">🔄</span>
+      <div class="header-text">
+        <h1>Word Swapper</h1>
+        <p>Substitute words on any page</p>
+      </div>
+    </div>
+    <label class="toggle" title="Enable / disable all rules">
+      <input type="checkbox" id="globalEnabled" checked />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="rules-list" id="rulesList">
+    <div class="empty-state" id="emptyState">
+      No rules yet — add one below.
+    </div>
+  </div>
+
+  <div class="add-form">
+    <div class="form-title">Add a rule</div>
+    <div class="input-row">
+      <input type="text" id="findInput" placeholder="Find…" autocomplete="off" spellcheck="false" />
+      <span class="arrow">→</span>
+      <input type="text" id="replaceInput" placeholder="Replace with…" autocomplete="off" spellcheck="false" />
+    </div>
+    <div class="options-row">
+      <label class="opt-label">
+        <input type="checkbox" id="caseSensitive" />
+        Case-sensitive
+      </label>
+      <label class="opt-label">
+        <input type="checkbox" id="wholeWord" />
+        Whole word
+      </label>
+    </div>
+    <button id="addBtn" class="btn-primary">Add Rule</button>
+  </div>
+
+  <div class="footer">
+    <span id="status" class="status"></span>
+    <button id="applyBtn" class="btn-secondary">▶ Apply to this tab</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
