@@ -16,6 +16,15 @@
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
+  function matchesSite(rule) {
+    if (!rule.sites || rule.sites.length === 0) return true;
+    const host = window.location.hostname.toLowerCase();
+    return rule.sites.some(site => {
+      const s = site.toLowerCase();
+      return host === s || host.endsWith('.' + s);
+    });
+  }
+
   function applyRulesToTextNode(node) {
     if (processedNodes.has(node)) return;
     const parent = node.parentElement;
@@ -25,7 +34,7 @@
     let changed = false;
 
     for (const rule of rules) {
-      if (!rule.enabled || !rule.find) continue;
+      if (!rule.enabled || !rule.find || !matchesSite(rule)) continue;
       const flags = rule.caseSensitive ? 'g' : 'gi';
       const escaped = escapeRegex(rule.find);
       const pattern = rule.wholeWord ? `\\b${escaped}\\b` : escaped;

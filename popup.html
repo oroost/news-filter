@@ -21,6 +21,12 @@
     </label>
   </div>
 
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="rules">My Rules</button>
+    <button class="tab-btn" data-tab="packs">✨ Packs</button>
+  </div>
+
+  <div id="tab-rules" class="tab-content">
   <div class="rules-list" id="rulesList">
     <div class="empty-state" id="emptyState">
       No rules yet — add one below.
@@ -44,7 +50,15 @@
         Whole word
       </label>
     </div>
+    <div class="sites-row">
+      <input type="text" id="sitesInput" placeholder="Only on: bbc.com, nytimes.com  (blank = all sites)" autocomplete="off" />
+    </div>
     <button id="addBtn" class="btn-primary">Add Rule</button>
+  </div>
+  </div><!-- end tab-rules -->
+
+  <div id="tab-packs" class="tab-content" style="display:none">
+    <div class="packs-list" id="packsList"></div>
   </div>
 
   <div class="footer">
@@ -52,6 +66,7 @@
     <button id="applyBtn" class="btn-secondary">▶ Apply to this tab</button>
   </div>
 
+  <script src="packs.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

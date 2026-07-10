@@ -48,6 +48,7 @@ function renderRules() {
       <div class="rule-badges">
         ${rule.caseSensitive ? '<span class="badge" title="Case-sensitive">Aa</span>' : ''}
         ${rule.wholeWord ? '<span class="badge" title="Whole word">W</span>' : ''}
+        ${rule.sites && rule.sites.length ? rule.sites.map(s => `<span class="badge site-badge" title="Site filter">${escapeHtml(s)}</span>`).join('') : ''}
       </div>
       <button class="btn-delete" data-index="${index}" title="Delete rule">✕</button>
     `;
@@ -58,6 +59,52 @@ function renderRules() {
 function saveRules(callback) {
   chrome.storage.sync.set({ rules, enabled: globalEnabled }, () => {
     if (callback) callback();
+  });
+}
+
+function renderPacks() {
+  const list = document.getElementById('packsList');
+  list.innerHTML = '';
+  RULE_PACKS.forEach(pack => {
+    const loadedCount = pack.rules.filter(pr => rules.some(r => r.find === pr.find)).length;
+    const allLoaded = loadedCount === pack.rules.length;
+    const card = document.createElement('div');
+    card.className = 'pack-card';
+    card.innerHTML = `
+      <div class="pack-header">
+        <span class="pack-emoji">${pack.emoji}</span>
+        <div class="pack-info">
+          <div class="pack-name">${escapeHtml(pack.name)}</div>
+          <div class="pack-desc">${escapeHtml(pack.description)}</div>
+        </div>
+        <button class="btn-load-pack${allLoaded ? ' loaded' : ''}" data-pack-id="${pack.id}">
+          ${allLoaded ? '✓ Loaded' : `Load (${pack.rules.length})`}
+        </button>
+      </div>
+      <div class="pack-rules-preview">
+        ${pack.rules.slice(0, 4).map(r =>
+          `<span class="preview-rule">${escapeHtml(r.find)} → ${escapeHtml(r.replace)}</span>`
+        ).join('')}
+        ${pack.rules.length > 4 ? `<span class="preview-more">+${pack.rules.length - 4} more</span>` : ''}
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function loadPack(packId) {
+  const pack = RULE_PACKS.find(p => p.id === packId);
+  if (!pack) return;
+  let added = 0;
+  pack.rules.forEach(pr => {
+    if (!rules.some(r => r.find === pr.find)) {
+      rules.push({ ...pr, sites: [], enabled: true });
+      added++;
+    }
+  });
+  saveRules(() => {
+    showStatus(`${added} rule${added !== 1 ? 's' : ''} added from "${pack.name}"`);
+    renderPacks();
   });
 }
 
@@ -103,17 +150,21 @@ document.addEventListener('DOMContentLoaded', () => {
       showStatus('A rule for that word already exists.', true);
       return;
     }
+    const sitesRaw = document.getElementById('sitesInput').value;
+    const sites = sitesRaw ? sitesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
     rules.push({
       find: findVal,
       replace: document.getElementById('replaceInput').value,
       caseSensitive: document.getElementById('caseSensitive').checked,
       wholeWord: document.getElementById('wholeWord').checked,
+      sites,
       enabled: true
     });
     document.getElementById('findInput').value = '';
     document.getElementById('replaceInput').value = '';
     document.getElementById('caseSensitive').checked = false;
     document.getElementById('wholeWord').checked = false;
+    document.getElementById('sitesInput').value = '';
     renderRules();
     saveRules(() => showStatus('Rule added'));
   });
@@ -140,5 +191,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       );
     });
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => { t.style.display = 'none'; });
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).style.display = 'block';
+      if (btn.dataset.tab === 'packs') renderPacks();
+    });
+  });
+
+  document.getElementById('packsList').addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-load-pack');
+    if (btn && !btn.classList.contains('loaded')) {
+      loadPack(btn.dataset.packId);
+    }
   });
 });
