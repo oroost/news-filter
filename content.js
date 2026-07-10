@@ -20,7 +20,8 @@
     if (!rule.sites || rule.sites.length === 0) return true;
     const host = window.location.hostname.toLowerCase();
     return rule.sites.some(site => {
-      const s = site.toLowerCase();
+      let s = site.toLowerCase().trim();
+      try { s = new URL(s.includes('://') ? s : 'https://' + s).hostname; } catch (_) {}
       return host === s || host.endsWith('.' + s);
     });
   }
@@ -77,6 +78,10 @@
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         for (const mutation of mutations) {
+          if (mutation.type === 'characterData') {
+            processedNodes.delete(mutation.target);
+            applyRulesToTextNode(mutation.target);
+          }
           for (const added of mutation.addedNodes) {
             if (added.nodeType === Node.TEXT_NODE) {
               applyRulesToTextNode(added);
@@ -88,21 +93,25 @@
       }, 80);
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
   function init() {
     chrome.storage.sync.get(['rules', 'enabled'], (data) => {
       rules = data.rules || [];
       globalEnabled = data.enabled !== false;
+      processedNodes = new WeakSet();
       applyAll();
       setupObserver();
+      [1000, 3000, 6000].forEach(ms => setTimeout(() => { processedNodes = new WeakSet(); applyAll(); }, ms));
     });
   }
 
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.rules) rules = changes.rules.newValue || [];
     if (changes.enabled) globalEnabled = changes.enabled.newValue !== false;
+    processedNodes = new WeakSet();
+    applyAll();
   });
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -114,6 +123,14 @@
       sendResponse({ ok: true });
     }
   });
+
+  let currentUrl = location.href;
+
+  setInterval(() => {
+    if (location.href === currentUrl) return;
+    currentUrl = location.href;
+    [300, 1200, 3000].forEach(ms => setTimeout(() => { processedNodes = new WeakSet(); applyAll(); }, ms));
+  }, 500);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
