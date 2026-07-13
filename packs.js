@@ -56,6 +56,26 @@ const RULE_PACKS = [
     ]
   },
   {
+    id: 'politics',
+    name: 'Politics Mode',
+    emoji: '🎪',
+    description: 'Turns international politics into a circus spectacle.',
+    rules: [
+      { find: 'sanctions',        replace: 'strongly worded letter',  caseSensitive: false, wholeWord: true },
+      { find: 'summit',           replace: 'awkward group photo',     caseSensitive: false, wholeWord: true },
+      { find: 'negotiations',     replace: 'loud argument over lunch', caseSensitive: false, wholeWord: true },
+      { find: 'diplomat',         replace: 'professional apologiser', caseSensitive: false, wholeWord: true },
+      { find: 'diplomacy',        replace: 'polite arguing',          caseSensitive: false, wholeWord: true },
+      { find: 'veto',             replace: 'nope',                    caseSensitive: false, wholeWord: true },
+      { find: 'alliance',         replace: 'friendship bracelet',     caseSensitive: false, wholeWord: true },
+      { find: 'foreign policy',   replace: 'vibes',                   caseSensitive: false, wholeWord: false },
+      { find: 'press conference', replace: 'excuse parade',           caseSensitive: false, wholeWord: false },
+      { find: 'debate',           replace: 'shouting contest',        caseSensitive: false, wholeWord: true },
+      { find: 'budget',           replace: 'money drama',             caseSensitive: false, wholeWord: true },
+      { find: 'coalition',        replace: 'uneasy friendship',       caseSensitive: false, wholeWord: true },
+    ]
+  },
+  {
     id: 'cozy',
     name: 'Cozy Mode',
     emoji: '🌿',
